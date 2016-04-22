@@ -13,7 +13,7 @@ import javax.swing.Timer;
 import java.util.*;
 
 public class PongPanel extends JPanel implements ActionListener, KeyListener{
-
+	Random randomno=new Random();
     private boolean upPressed = false;
     private boolean downPressed = false;
     private boolean wPressed = false;
@@ -22,7 +22,9 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener{
     private int ballX = 250;
     private int ballY = 250;
     private int diameter = 20;
-    private int ballDeltaX = -3;
+
+    
+    private int ballDeltaX = 3;
     private int ballDeltaY = 3;
 
     private int playerOneX = 25;                                //this represents the left coordinate of the bat
@@ -49,10 +51,14 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener{
 
     private int playerOneScore = 0;
     private int playerTwoScore = 0;
+    int i=0;
+   
+   
 
 
     //construct a PongPanel
     public PongPanel(){
+
         setBackground(Color.BLACK);
 
         //listen to key presses
@@ -71,6 +77,7 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener{
 
     public void step(){
 
+    	randomno=new Random();
         //move player 1
         if (upPressed) {                                            //means positive direction is below. because on up press, y value is being reduced
             if (playerOneY-paddleSpeed > 0) {
@@ -127,7 +134,12 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener{
 
                 ballX = 250;
                 ballY = 250;
-                
+               ballDeltaX=3*(randomno.nextInt(1));
+                if(ballDeltaX>0){ballDeltaX+=3;}
+                else{ballDeltaX-=3;}
+                ballDeltaY=3*(randomno.nextInt(1));
+            	if(ballDeltaY>0){ballDeltaY+=3;}
+                else{ballDeltaY-=3;}
             }
             else {
                 ballDeltaX *= -1;
@@ -144,6 +156,12 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener{
 
                 ballX = 250;
                 ballY = 250;
+                ballDeltaX=3*(randomno.nextInt(1));
+                if(ballDeltaX>0){ballDeltaX+=3;}
+                else{ballDeltaX-=3;}
+                ballDeltaY=3*(randomno.nextInt(1));
+            	if(ballDeltaY>0){ballDeltaY+=3;}
+                else{ballDeltaY-=3;}
             }
             else {
                 ballDeltaX *= -1;
@@ -155,28 +173,42 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener{
         ballX += ballDeltaX;
         ballY += ballDeltaY;
 
-        Random randomno = new Random();
+        
  
    // check next Gaussian value  
         int noise = (int)randomno.nextGaussian()*100;
         //computerplay(noise, ballX, ballDeltaX, playerFourWidth);
-        int temp = (int)randomno.nextGaussian()*100;
-        playerFourX=ballX-2*ballDeltaX-playerFourWidth/2+temp;
+        int temp = (int)randomno.nextGaussian()*4;
+        if(i%30==0)
+       { playerFourX=ballX-2*ballDeltaX-playerFourWidth/2+temp;}
+   		playerFourX+=ballDeltaX;
+        System.out.println(ballDeltaX);
         float playerFourBottom=playerFourY+playerFourHeight;
         float playerFourLeft=playerFourX;
         float playerFourRight=playerFourX+playerFourWidth;
 
         if(nextBallTop<playerFourY){
+
             if(nextBallLeft<playerFourRight && nextBallRight>playerFourLeft)
             {
                 ballDeltaY *=-1;
+                randomno = new Random();
+                System.out.println("yo");
             }
             else{
                 //setBackground(Color.GREEN);
                 ballX=250;
                 ballY=250;
+                ballDeltaX=3*(randomno.nextInt(1));
+                if(ballDeltaX>0){ballDeltaX+=3;}
+                else{ballDeltaX-=3;}
+                ballDeltaY=3*(randomno.nextInt(1));
+            	if(ballDeltaY>0){ballDeltaY+=3;}
+                else{ballDeltaY-=3;}
+
             }
         }
+        i++;
         //stuff has moved, tell this JPanel to repaint itself
         repaint();
     }
