@@ -52,7 +52,18 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener{
     private int playerOneScore = 0;
     private int playerTwoScore = 0;
     int i=0;
+    int temp=0;
+    private int splpwrX=10000;
+    private int splpwrY=10000;
+    private int splpwrspdX=-1;
+    private int splpwr2X=10000;
+    private int splpwr2Y=10000;
+    private int splpwr2spdX=1;
+    boolean spl=true;
+    boolean success=false;
    
+   int playerOneLives=15;
+   int playerTwoLives=15;
    
 
 
@@ -78,6 +89,8 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener{
     public void step(){
 
     	randomno=new Random();
+
+
         //move player 1
         if (upPressed) {                                            //means positive direction is below. because on up press, y value is being reduced
             if (playerOneY-paddleSpeed > 0) {
@@ -140,6 +153,7 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener{
                 ballDeltaY=3*(randomno.nextInt(1));
             	if(ballDeltaY>0){ballDeltaY+=3;}
                 else{ballDeltaY-=3;}
+                playerOneLives--;
             }
             else {
                 ballDeltaX *= -1;
@@ -162,6 +176,7 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener{
                 ballDeltaY=3*(randomno.nextInt(1));
             	if(ballDeltaY>0){ballDeltaY+=3;}
                 else{ballDeltaY-=3;}
+                playerTwoLives--;
             }
             else {
                 ballDeltaX *= -1;
@@ -182,7 +197,7 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener{
         if(i%30==0)
        { playerFourX=ballX-2*ballDeltaX-playerFourWidth/2+temp;}
    		playerFourX+=ballDeltaX;
-        System.out.println(ballDeltaX);
+       // System.out.println(ballDeltaX);
         float playerFourBottom=playerFourY+playerFourHeight;
         float playerFourLeft=playerFourX;
         float playerFourRight=playerFourX+playerFourWidth;
@@ -242,13 +257,18 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener{
     //paint the game screen
     public void paintComponent(Graphics g){
 
+
         super.paintComponent(g);
         g.setColor(Color.WHITE);
-
+        System.out.println(i);
         int playerOneRight = playerOneX + playerOneWidth;
         int playerTwoLeft =  playerTwoX;
         int playerThreeTop = playerThreeY;
         int playerFourBottom = playerFourY + playerFourHeight;
+        int playerOneTop = playerOneY;
+        int playerOneBottom = playerOneY + playerOneHeight;
+        float playerTwoTop = playerTwoY;
+        float playerTwoBottom = playerTwoY + playerTwoHeight;
 
         //draw dashed line down center
         //for (int lineY = 0; lineY < getHeight(); lineY += 50) {
@@ -265,9 +285,86 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener{
         g.setFont(new Font(Font.DIALOG, Font.BOLD, 36));
         g.drawString(String.valueOf(playerOneScore), 100, 100);
         g.drawString(String.valueOf(playerTwoScore), 400, 100);
+        g.drawString(String.valueOf(playerOneLives), 100, 400);
+        g.drawString(String.valueOf(playerTwoLives), 400, 400);
 
         //draw the ball
         g.fillOval(ballX, ballY, diameter, diameter);
+
+        g.setColor(Color.red);
+        g.fillRect(splpwrX,splpwrY,10,10);
+         g.setColor(Color.white);
+        if(i%300==0){splpwrX=250; splpwrY=250+ randomno.nextInt(250);  System.out.println("   "+splpwrY);}
+        splpwrX+=splpwrspdX;
+        if (!success && splpwrX < playerOneRight) { 
+            //is it going to miss the paddle?
+            if (splpwrY < playerOneBottom && splpwrY> playerOneTop) {
+
+                success=true; temp=i;
+                splpwrX=10000;
+    		    splpwrY=10000;
+    		    playerOneScore+=5;
+            }
+            else {
+                success=false;
+            }
+        }
+       // else{success=false;}
+
+        g.setColor(Color.red);
+        g.fillRect(splpwr2X,splpwr2Y,10,10);
+         g.setColor(Color.white);
+        if(i%500==0){splpwr2X=250; splpwr2Y=250+ randomno.nextInt(250);  System.out.println("   "+splpwrY);}
+        splpwr2X+=splpwr2spdX;
+        if (!success && splpwr2X > playerTwoLeft) { 
+            //is it going to miss the paddle?
+            if (splpwr2Y < playerTwoBottom && splpwr2Y> playerTwoTop) {
+
+                success=true; temp=i;
+                splpwr2X=10000;
+    		    splpwr2Y=10000;
+    		    playerTwoScore+=5;
+            }
+            else {
+                success=false;
+            }
+        }
+
+        if(success && i<=temp+200){ g.setColor(Color.yellow);playerTwoHeight=100;}
+        else{success=false; playerTwoHeight=50;g.setColor(Color.white);}
+
+
+
+
+
+
+/*
+
+        if(i%200==0){spl=true;}
+
+        if(i>=200&&splpwrX>=playerOneRight&&spl){
+        	g.fillRect(splpwrX,splpwrY,10,10);
+        	
+        }
+        if(splpwrX<playerOneRight&&spl){temp=i;splpwrX=250; splpwrY=250+ randomno.nextInt(25); spl=false;}
+
+        //if(i>=200&&spl){splpwrX+=splpwrspdX;}
+
+        if (splpwrX < playerOneRight) { 
+            //is it going to miss the paddle?
+            if (splpwrY < playerOneBottom && splpwrY> playerOneTop) {
+
+                success=true;
+            }
+            else {
+                success=false;
+            }
+        }
+        if(success && i<=temp+250){playerOneHeight=100;}
+        else{success=false; playerOneHeight=50;}
+
+
+*/
 
         //draw the paddles
         g.fillRect(playerOneX, playerOneY, playerOneWidth, playerOneHeight);
