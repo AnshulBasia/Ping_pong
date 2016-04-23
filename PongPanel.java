@@ -53,6 +53,7 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener{
     private int playerTwoScore = 0;
     int i=0;
     int temp=0;
+    int temp2=0;
     private int splpwrX=10000;
     private int splpwrY=10000;
     private int splpwrspdX=-1;
@@ -61,6 +62,7 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener{
     private int splpwr2spdX=1;
     boolean spl=true;
     boolean success=false;
+    boolean success2=false;
    
    int playerOneLives=15;
    int playerTwoLives=15;
@@ -291,9 +293,9 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener{
         //draw the ball
         g.fillOval(ballX, ballY, diameter, diameter);
 
-        g.setColor(Color.red);
+        g.setColor(Color.green);
         g.fillRect(splpwrX,splpwrY,10,10);
-         g.setColor(Color.white);
+        g.setColor(Color.white);
         if(i%300==0){splpwrX=250; splpwrY=250+ randomno.nextInt(250);  System.out.println("   "+splpwrY);}
         splpwrX+=splpwrspdX;
         if (!success && splpwrX < playerOneRight) { 
@@ -309,6 +311,9 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener{
                 success=false;
             }
         }
+         if(success && i<=temp+200){ g.setColor(Color.yellow);playerOneHeight=100;}
+        else{success=false; playerOneHeight=50;g.setColor(Color.white);}
+
        // else{success=false;}
 
         g.setColor(Color.red);
@@ -316,22 +321,22 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener{
          g.setColor(Color.white);
         if(i%500==0){splpwr2X=250; splpwr2Y=250+ randomno.nextInt(250);  System.out.println("   "+splpwrY);}
         splpwr2X+=splpwr2spdX;
-        if (!success && splpwr2X > playerTwoLeft) { 
+        if (!success2 && splpwr2X > playerTwoLeft) { 
             //is it going to miss the paddle?
             if (splpwr2Y < playerTwoBottom && splpwr2Y> playerTwoTop) {
 
-                success=true; temp=i;
+                success2=true; temp2=i;
                 splpwr2X=10000;
     		    splpwr2Y=10000;
     		    playerTwoScore+=5;
             }
             else {
-                success=false;
+                success2=false;
             }
         }
 
-        if(success && i<=temp+200){ g.setColor(Color.yellow);playerTwoHeight=100;}
-        else{success=false; playerTwoHeight=50;g.setColor(Color.white);}
+        if(success2 && i<=temp2+200){ g.setColor(Color.yellow);playerTwoHeight=100;}
+        else{success2=false; playerTwoHeight=50;g.setColor(Color.white);}
 
 
 
@@ -367,8 +372,11 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener{
 */
 
         //draw the paddles
+        g.setColor(Color.green);
         g.fillRect(playerOneX, playerOneY, playerOneWidth, playerOneHeight);
+        g.setColor(Color.red);
         g.fillRect(playerTwoX, playerTwoY, playerTwoWidth, playerTwoHeight);
+        g.setColor(Color.white);
         g.fillRect(playerThreeX, playerThreeY, playerThreeWidth, playerThreeHeight);
         g.fillRect(playerFourX, playerFourY, playerFourWidth, playerFourHeight);
     }
