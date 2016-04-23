@@ -343,33 +343,6 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener{
 
 
 
-/*
-
-        if(i%200==0){spl=true;}
-
-        if(i>=200&&splpwrX>=playerOneRight&&spl){
-        	g.fillRect(splpwrX,splpwrY,10,10);
-        	
-        }
-        if(splpwrX<playerOneRight&&spl){temp=i;splpwrX=250; splpwrY=250+ randomno.nextInt(25); spl=false;}
-
-        //if(i>=200&&spl){splpwrX+=splpwrspdX;}
-
-        if (splpwrX < playerOneRight) { 
-            //is it going to miss the paddle?
-            if (splpwrY < playerOneBottom && splpwrY> playerOneTop) {
-
-                success=true;
-            }
-            else {
-                success=false;
-            }
-        }
-        if(success && i<=temp+250){playerOneHeight=100;}
-        else{success=false; playerOneHeight=50;}
-
-
-*/
 
         //draw the paddles
         g.setColor(Color.green);
