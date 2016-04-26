@@ -18,6 +18,7 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener{
     private boolean downPressed = false;
     private boolean wPressed = false;
     private boolean sPressed = false;
+    private boolean lshiftpressed=false;
 
     private int ballX = 250;
     private int ballY = 250;
@@ -43,7 +44,7 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener{
     private int playerThreeHeight = 10;
 
     private int playerFourX = 250;                          //player 4 is the computer player
-    private int playerFourY = 15;
+    private int playerFourY = 25;
     private int playerFourWidth = 50;
     private int playerFourHeight = 10;
 
@@ -67,7 +68,10 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener{
    int playerOneLives=15;
    int playerTwoLives=15;
    
+   int freeze=0;
+   boolean edge=false;
 
+   int boost=200;
 
     //construct a PongPanel
     public PongPanel(){
@@ -92,26 +96,17 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener{
 
     	randomno=new Random();
 
-
+    	int move1=player1_move();
         //move player 1
-        if (upPressed) {                                            //means positive direction is below. because on up press, y value is being reduced
-            if (playerOneY-paddleSpeed > 0) {
-                playerOneY -= paddleSpeed;
-            }
-        }
-        if (downPressed) {
-            if (playerOneY + paddleSpeed + playerOneHeight < getHeight()) {
-                playerOneY += paddleSpeed;
-            }
-        }
+        
 
         //move player 2
-        if (wPressed) {
+        if (upPressed) {
             if (playerTwoY-paddleSpeed > 0) {
                 playerTwoY -= paddleSpeed;
             }
         }
-        if (sPressed) {
+        if (downPressed) {
             if (playerTwoY + paddleSpeed + playerTwoHeight < getHeight()) {
                 playerTwoY += paddleSpeed;
             }
@@ -149,16 +144,64 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener{
 
                 ballX = 250;
                 ballY = 250;
+
+                /*
+                int a=randomno.nextInt()%45;
+
+                ballDeltaX=3*Maths.cos((a+22.5)*Maths.PI/180);
+                ballDeltaX=3*Maths.sin((a+22.5)*Maths.PI/180);
+
+                */
+
+
                ballDeltaX=3*(randomno.nextInt(1));
                 if(ballDeltaX>0){ballDeltaX+=3;}
                 else{ballDeltaX-=3;}
                 ballDeltaY=3*(randomno.nextInt(1));
             	if(ballDeltaY>0){ballDeltaY+=3;}
                 else{ballDeltaY-=3;}
+                
                 playerOneLives--;
+                edge=false;
+
             }
             else {
                 ballDeltaX *= -1;
+                if(move1==1)
+                {
+                    ballDeltaY -=paddleSpeed/6;
+                }
+                else
+                {
+                    ballDeltaY +=paddleSpeed/6;
+                }
+                /*
+                if(ballDeltaY>playerOneY+25)
+                {
+                	if(playerOneY-ballDeltaY<=53&&playerOneY-ballDeltaY>=47)
+                	{
+                		 freeze=i;//to make computer freeze
+                		 edge=true;
+                	}
+                	else
+                	{
+                		edge=false;
+                	}
+                }
+            	else
+            	{
+            		if(playerOneY-ballDeltaY<=5||playerOneY-ballDeltaY>=-5)
+            		{
+            			 freeze=i;//to make computer freeze
+            			 edge=true;
+            		}
+            		else
+            		{
+            			edge=false;
+            		}
+            	}
+                
+                */
             }
         }
 
@@ -196,10 +239,51 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener{
         int noise = (int)randomno.nextGaussian()*100;
         //computerplay(noise, ballX, ballDeltaX, playerFourWidth);
         int temp = (int)randomno.nextGaussian()*4;
-        if(i%30==0)
+        /*
+        if(i%300==0)
        { playerFourX=ballX-2*ballDeltaX-playerFourWidth/2+temp;}
-   		playerFourX+=ballDeltaX;
+   		if(i%3==0)
+   		{playerFourX+=ballDeltaX/2;}
+   	if(i%3==1)
+   		{playerFourX+=ballDeltaX;}
+   	if(i%3==2)
+   		{playerFourX+=ballDeltaX*2;}
+
+   	*/
+   		/*if(i>=500 && i<=750)
+   			{ playerFourX+=ballDeltaX/2;}
+   		else
+   			{playerFourX+=ballDeltaX;}
+   			*/
+   		//playerFourX+=ballDeltaX;
+   		//System.out.println("sd"+playerFourX);
+
+
+/*
+   			if(ballY-playerFourY<=50)
+   			{
+   				playerFourX+=(ballX-playerFourX)/(2*(ballY-playerFourY));
+   			}
+   			*/
+   			if(i%400==0){freeze=i;edge=true;}
+   			if(edge)
+   			{
+   				if(i-freeze>=50)
+   				{
+   					edge=false;
+   				}
+   			}
+   			else
+   			{
+   				playerFourX+=ballDeltaX;
+   			}
+
+       
        // System.out.println(ballDeltaX);
+   	/*
+       if(edge&&i<=freeze+20){playerFourX=500-ballX;}
+       if(i==freeze+21){playerFourX=ballX;}
+       */
         float playerFourBottom=playerFourY+playerFourHeight;
         float playerFourLeft=playerFourX;
         float playerFourRight=playerFourX+playerFourWidth;
@@ -216,6 +300,7 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener{
                 //setBackground(Color.GREEN);
                 ballX=250;
                 ballY=250;
+                playerFourX=250;
                 ballDeltaX=3*(randomno.nextInt(1));
                 if(ballDeltaX>0){ballDeltaX+=3;}
                 else{ballDeltaX-=3;}
@@ -228,7 +313,36 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener{
         i++;
         //stuff has moved, tell this JPanel to repaint itself
         repaint();
+       // randomno.randomize();
     }
+    public int player1_move()
+   	  {
+        int bool=0;
+         if(lshiftpressed && boost>=2) {
+        	boost-=2;
+        	paddleSpeed=12;
+         }
+         if(!lshiftpressed){
+         	paddleSpeed=5;
+         	if(boost<=199 && i%20==0)
+         	{boost+=1;}
+         }
+        if (wPressed) {  
+            bool=1;                                       //means positive direction is below. because on up press, y value is being reduced
+            if (playerOneY-paddleSpeed > 0) {
+                playerOneY -= paddleSpeed;
+            }
+        }
+        if (sPressed) {
+            if (playerOneY + paddleSpeed + playerOneHeight < getHeight()) {
+                playerOneY += paddleSpeed;
+            }
+        }
+       
+
+        return bool;
+    	}
+    
 
     public void computerplay(int noise,int ballX,int ballDeltaX,int playerFourWidth)
     {
@@ -284,8 +398,8 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener{
         g.drawLine(0, playerFourBottom, getWidth(),playerFourBottom);
 
         //draw the scores
-        g.setFont(new Font(Font.DIALOG, Font.BOLD, 36));
-        g.drawString(String.valueOf(playerOneScore), 100, 100);
+        g.setFont(new Font(Font.DIALOG, Font.BOLD, 16));
+        g.drawString("boost  "+String.valueOf(boost), 100, 100);
         g.drawString(String.valueOf(playerTwoScore), 400, 100);
         g.drawString(String.valueOf(playerOneLives), 100, 400);
         g.drawString(String.valueOf(playerTwoLives), 400, 400);
@@ -371,6 +485,9 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener{
         else if (e.getKeyCode() == KeyEvent.VK_S) {
             sPressed = true;
         }
+        else if (e.getKeyCode() == KeyEvent.VK_SHIFT){
+        	lshiftpressed=true;
+        }
     }
 
 
@@ -386,6 +503,9 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener{
         }
         else if (e.getKeyCode() == KeyEvent.VK_S) {
             sPressed = false;
+        }
+        else if (e.getKeyCode() == KeyEvent.VK_SHIFT){
+        	lshiftpressed=false;
         }
     }
 

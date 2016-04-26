@@ -2,7 +2,7 @@ import java.awt.BorderLayout;
 
 import javax.swing.JFrame;
 
-public class Main{
+public class comp{
 
     public static void main(String[] args) {
 
@@ -10,7 +10,7 @@ public class Main{
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
 
-        PongPanel pongPanel = new PongPanel();
+        single_player pongPanel = new single_player();
         frame.add(pongPanel, BorderLayout.CENTER);
 
         frame.setSize(500, 500);
