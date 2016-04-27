@@ -32,6 +32,7 @@ public class single_player extends JPanel implements ActionListener, KeyListener
     
     private int ballDeltaX = 3;
     private int ballDeltaY = 3;
+    int temp_x;
 
     private int playerOneX = 250;                                //this represents the left coordinate of the bat
     private int playerOneY = 425;                               // this represents the topmost coordinated of bat
@@ -51,6 +52,8 @@ public class single_player extends JPanel implements ActionListener, KeyListener
         int nextBallRight ;
         int nextBallTop ;
         int nextBallBottom;
+        int BallTop;
+        int BallBottom;
 
         int playerOneRight;
         int playerOneTop ;
@@ -60,7 +63,8 @@ public class single_player extends JPanel implements ActionListener, KeyListener
     float playerFourLeft;
     float playerFourRight;
 
-    private int paddleSpeed = 5;        //represents speed of the bat
+    private int paddleSpeed = 5; 
+    int comp_paddle;       //represents speed of the bat
 
     private int playerOneScore = 0;
     
@@ -123,7 +127,14 @@ public class single_player extends JPanel implements ActionListener, KeyListener
     public void reset_ball()
     {				
 
-    			 ballX = 250;
+    			 
+                    try {
+                     Thread.sleep(1000);                 //1000 milliseconds is one second.
+                    } catch(InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                        }
+
+                 ballX = 250;
            		ballY = 250;
            		
 
@@ -147,7 +158,8 @@ public class single_player extends JPanel implements ActionListener, KeyListener
 
                 //System.out.println("  "+a+22.5+"ww "+ballDeltaX+" "+ballDeltaY);
                 if(level==2){ballDeltaX*=1.3;ballDeltaY*=1.3;}
-			   if(level==3){ballDeltaX*=1.8;ballDeltaY*=1.8;}
+			   if(level==3){ballDeltaX*=2.5;ballDeltaY*=1.8;}
+               temp_x=ballDeltaX;
 /*
                 
                ballDeltaX=3*(randomno.nextInt(1));
@@ -197,6 +209,7 @@ public class single_player extends JPanel implements ActionListener, KeyListener
     	if(qpressed||playerOneLives<=0){
     		exit();
     	}
+        
 
     	if(!pause)
     	{
@@ -210,10 +223,12 @@ public class single_player extends JPanel implements ActionListener, KeyListener
         
 
         //where will the ball be after it moves?
-        nextBallLeft = ballX + ballDeltaX;
-         nextBallRight = ballX + diameter + ballDeltaX;
-        nextBallTop = ballY + ballDeltaY;
-        nextBallBottom = ballY + diameter + ballDeltaY;
+        nextBallLeft = ballX + ballDeltaX-(diameter/2);
+         nextBallRight = ballX + (diameter/2) + ballDeltaX;
+        nextBallTop = ballY + ballDeltaY-(diameter/2);
+        nextBallBottom = ballY + (diameter/2) + ballDeltaY;
+        BallTop = ballY -(diameter/2);
+        BallBottom = ballY + (diameter/2) ;
 
          playerOneRight = playerOneX + playerOneWidth;
          playerOneTop = playerOneY;
@@ -230,50 +245,34 @@ public class single_player extends JPanel implements ActionListener, KeyListener
         }
 
         
-        if (nextBallBottom > playerOneY) { 
+        if (BallBottom >= playerOneY) { 
             //is it going to miss the paddle?
-            if (nextBallRight > playerOneRight || nextBallLeft < playerOneX) {
+            if (nextBallLeft > playerOneRight || nextBallRight < playerOneX) {
             	playerOneLives--;
-                
+               
                reset_ball();
             }
             else {
                 ballDeltaY *= -1;
-                if(move1==1)
+                
+                
+                if((ballX>playerOneX&&ballX-playerOneX<=5)||ballX<playerOneX+50&&ballX>=playerOneX+5)
                 {
-                    ballDeltaX -=paddleSpeed/6;
+                	edge=true;
+            	}
+
+                if(edge)
+                {
+                    temp_x=ballDeltaX;
+                    ballDeltaX*=2;
+
                 }
                 else
                 {
-                    ballDeltaX +=paddleSpeed/6;
+                    ballDeltaX=temp_x;
                 }
-                /*
-                if(ballDeltaY>playerOneY+25)
-                {
-                	if(playerOneY-ballDeltaY<=53&&playerOneY-ballDeltaY>=47)
-                	{
-                		 freeze=i;//to make computer freeze
-                		 edge=true;
-                	}
-                	else
-                	{
-                		edge=false;
-                	}
-                }
-            	else
-            	{
-            		if(playerOneY-ballDeltaY<=5||playerOneY-ballDeltaY>=-5)
-            		{
-            			 freeze=i;//to make computer freeze
-            			 edge=true;
-            		}
-            		else
-            		{
-            			edge=false;
-            		}
-            	}
                 
-                */
+                
             }
         }
 
@@ -305,19 +304,24 @@ public class single_player extends JPanel implements ActionListener, KeyListener
    			}
    			else
    			{
-   				AI(level);
+                AI2();
+   				//AI(level);
    				//move_computer();
    			}
 
-   			if(nextBallTop<playerFourBottom){
-            if(nextBallLeft<playerFourRight && nextBallRight>playerFourLeft)
+   			if(BallTop<playerFourBottom){
+
+            if(nextBallLeft > playerFourRight || nextBallRight < playerFourX)
             {
-                ballDeltaY *=-1;
-                randomno = new Random();
+                playerFourX=250;
+                reset_ball();
+
+
+               
             }
             else{
                 
-                reset_ball();
+                ballDeltaY *=-1;
             }
         }
 
@@ -375,11 +379,34 @@ public class single_player extends JPanel implements ActionListener, KeyListener
     		}
     	}
     }
+    public void AI2()
+    {       
+                if(ballDeltaX<=8&& ballDeltaX>=-8){comp_paddle=ballDeltaX;}
+                else {
+                    if(ballDeltaX>0){comp_paddle=8;}
+                    else{comp_paddle=-8;}
+                }
+                
+                if(comp_paddle>0)
+                {
+                    if(playerFourX+playerFourWidth+comp_paddle<right_barrier){playerFourX+=comp_paddle;}
+                }
+                else
+                {
+                    if(playerFourX-comp_paddle>left_barrier){playerFourX+=comp_paddle;}
+                }
+            
+                
+            
+               
+        
+
+    }
 
     public void special_bottom()
     {
     	 if(!pause){
-        if(i%300==0){splpwrX=250+randomno.nextInt(250); splpwrY=125;  System.out.println("   "+splpwrY);}
+        if(i%300==0){splpwrX=250+randomno.nextInt(250); splpwrY=125;}
         splpwrY+=splpwrspdY;
         
         if (!success && splpwrY >= playerOneTop) { 
@@ -409,7 +436,7 @@ public class single_player extends JPanel implements ActionListener, KeyListener
 
         super.paintComponent(g);
         g.setColor(Color.WHITE);
-       System.out.println(i);
+       //System.out.println(i);
        if(i==1){
         try {
     		Thread.sleep(1000);                 //1000 milliseconds is one second.
