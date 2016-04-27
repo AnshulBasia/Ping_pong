@@ -6,6 +6,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
 
 import javax.swing.JPanel;
 import javax.swing.Timer;
@@ -14,9 +17,13 @@ import java.util.*;
 
 public class single_player extends JPanel implements ActionListener, KeyListener{
 	Random randomno=new Random();
+
+	
+   
     private boolean leftPressed = false;
     private boolean rightPressed = false;
     private boolean lshiftpressed=false;
+    private boolean qpressed=false;
 
     private int ballX = 250;
     private int ballY = 250;
@@ -75,19 +82,28 @@ public class single_player extends JPanel implements ActionListener, KeyListener
    boolean edge=false;
 
    int boost=200;
-
+   int level;
+   boolean pause=false;
+   boolean resume=true;
+   int gap,conf;
+   Timer timer = new Timer(1000/60, this);
     //construct a PongPanel
-    public single_player(){
+    public single_player(int a){
 
         setBackground(Color.BLACK);
+        level=a;
 
         //listen to key presses
         setFocusable(true);
+
         addKeyListener(this);
 
         //call step() 60 fps
-        Timer timer = new Timer(1000/60, this);
+        
+
+
         timer.start();
+        reset_ball();
     }
 
 
@@ -95,16 +111,26 @@ public class single_player extends JPanel implements ActionListener, KeyListener
         step();
     }
 
-    public void reset_ball()
+    public void exit()
     {
+    	 timer.stop();
+
+    	 SwingControlDemo exit = new SwingControlDemo();  
+    	 exit.exit(playerOneScore,playerOneLives);
+
+    }
+
+    public void reset_ball()
+    {				
+
     			 ballX = 250;
            		ballY = 250;
            		
 
                
                 int a=randomno.nextInt(2000)%45;
-                double x=new Double((4.2)*Math.cos((a+22.5)*Math.PI/180));
-                double y=(4.2)*Math.sin((a+22.5)*Math.PI/180);
+                double x=new Double((4)*Math.cos((a+22.5)*Math.PI/180));
+                double y=(4)*Math.sin((a+22.5)*Math.PI/180);
 
                 ballDeltaX=(int)x;
                 ballDeltaY=(int)y;
@@ -120,7 +146,8 @@ public class single_player extends JPanel implements ActionListener, KeyListener
                 }
 
                 //System.out.println("  "+a+22.5+"ww "+ballDeltaX+" "+ballDeltaY);
-
+                if(level==2){ballDeltaX*=1.3;ballDeltaY*=1.3;}
+			   if(level==3){ballDeltaX*=1.8;ballDeltaY*=1.8;}
 /*
                 
                ballDeltaX=3*(randomno.nextInt(1));
@@ -166,6 +193,17 @@ public class single_player extends JPanel implements ActionListener, KeyListener
 
     public void step(){
 
+
+    	if(qpressed||playerOneLives<=0){
+    		exit();
+    	}
+
+    	if(!pause)
+    	{
+    		
+    		
+    	
+
     	randomno=new Random();
 
     	int move1=player1_move();   // Player 1 movement
@@ -195,7 +233,7 @@ public class single_player extends JPanel implements ActionListener, KeyListener
         if (nextBallBottom > playerOneY) { 
             //is it going to miss the paddle?
             if (nextBallRight > playerOneRight || nextBallLeft < playerOneX) {
-
+            	playerOneLives--;
                 
                reset_ball();
             }
@@ -252,18 +290,22 @@ public class single_player extends JPanel implements ActionListener, KeyListener
          playerFourBottom=playerFourY+playerFourHeight;
          playerFourLeft=playerFourX;
          playerFourRight=playerFourX+playerFourWidth;
+
+         	if(level==1){gap=50; conf=5000;}
+         	if(level==2){gap=25;conf=2000;}
+         	if(level==3){gap=10; conf=400;}
         
-   			if(i%400==0){freeze=i;edge=true;}
+   			if(i%conf==0){freeze=i;edge=true;}
    			if(edge)
    			{
-   				if(i-freeze>=50)
+   				if(i-freeze>=gap)
    				{
    					edge=false;
    				}
    			}
    			else
    			{
-   				AI();
+   				AI(level);
    				//move_computer();
    			}
 
@@ -294,6 +336,7 @@ public class single_player extends JPanel implements ActionListener, KeyListener
         ballY += ballDeltaY;
 
         //stuff has moved, tell this JPanel to repaint itself
+    }
         repaint();
        // randomno.randomize();
     }
@@ -311,10 +354,14 @@ public class single_player extends JPanel implements ActionListener, KeyListener
     	
     }
 
-    public void AI()			//Different AI implementation to test on different circumstances
+    public void AI(int level)			//Different AI implementation to test on different circumstances
     {
+    		if(level==1){gap=100; conf=5000;}
+         	if(level==2){gap=250;conf=2000;}
+         	if(level==3){gap=400; conf=400;}
 
-    	if(ballY-playerFourY<=600)
+
+    	if(ballY-playerFourY<=gap)
     	{
     		if(ballX-(playerFourX+25)>=0)
     		{
@@ -329,13 +376,47 @@ public class single_player extends JPanel implements ActionListener, KeyListener
     	}
     }
 
+    public void special_bottom()
+    {
+    	 if(!pause){
+        if(i%300==0){splpwrX=250+randomno.nextInt(250); splpwrY=125;  System.out.println("   "+splpwrY);}
+        splpwrY+=splpwrspdY;
+        
+        if (!success && splpwrY >= playerOneTop) { 
+            //is it going to miss the paddle?
+            
+            if (splpwrX < playerOneRight && splpwrX> playerOneX) {
+
+                success=true;
+                 temp=i;
+                splpwrX=-10000;
+    		    splpwrY=-10000;
+    		    playerOneScore+=5;
+            }
+            else {
+                success=false;
+            }
+        }
+         if(success && i<=temp+200){playerOneWidth=100; }
+        else{success=false; playerOneWidth=50;}
+    }
+    }
+
+
     //paint the game screen
     public void paintComponent(Graphics g){
 
 
         super.paintComponent(g);
         g.setColor(Color.WHITE);
-       // System.out.println(i);
+       System.out.println(i);
+       if(i==1){
+        try {
+    		Thread.sleep(1000);                 //1000 milliseconds is one second.
+				} catch(InterruptedException ex) {
+   				 Thread.currentThread().interrupt();
+				}
+			}
         int playerOneRight = playerOneX + playerOneWidth;
        
         int playerFourBottom = playerFourY + playerFourHeight;
@@ -361,35 +442,18 @@ public class single_player extends JPanel implements ActionListener, KeyListener
         //draw the ball
         g.fillOval(ballX, ballY, diameter, diameter);
 
+        
+        special_bottom();
+       
         g.setColor(Color.green);
         g.fillRect(splpwrX,splpwrY,10,10);
         g.setColor(Color.white);
-        if(i%300==0){splpwrX=250+randomno.nextInt(250); splpwrY=125;  System.out.println("   "+splpwrY);}
-        splpwrY+=splpwrspdY;
-        //System.out.println("ko"+playerOneTop+"  "+splpwrY);
-        if (!success && splpwrY >= playerOneTop) { 
-            //is it going to miss the paddle?
-            
-            if (splpwrX < playerOneRight && splpwrX> playerOneX) {
-
-                success=true;
-                 temp=i;
-                splpwrX=-10000;
-    		    splpwrY=-10000;
-    		    playerOneScore+=5;
-            }
-            else {
-                success=false;
-            }
-        }
-         if(success && i<=temp+200){ g.setColor(Color.yellow);playerOneWidth=100; }
-        else{success=false; playerOneWidth=50;g.setColor(Color.white);}
 
        
 
 
 
-
+    
 
         //draw the paddles
         g.setColor(Color.green);
@@ -417,6 +481,13 @@ public class single_player extends JPanel implements ActionListener, KeyListener
         else if (e.getKeyCode() == KeyEvent.VK_SHIFT){
         	lshiftpressed=true;
         }
+        else if (e.getKeyCode() == KeyEvent.VK_SPACE){
+        	if(pause){resume =true; pause=false;}
+        	else{pause=true;}
+        }
+        else if(e.getKeyCode()==KeyEvent.VK_Q){
+        	qpressed=true;
+        }
     }
 
 
@@ -430,6 +501,9 @@ public class single_player extends JPanel implements ActionListener, KeyListener
         
         else if (e.getKeyCode() == KeyEvent.VK_SHIFT){
         	lshiftpressed=false;
+        }
+        else if(e.getKeyCode()==KeyEvent.VK_Q){
+        	qpressed=false;
         }
     }
 

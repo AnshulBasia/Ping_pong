@@ -10,7 +10,7 @@ public class comp{
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
 
-        single_player pongPanel = new single_player();
+        single_player pongPanel = new single_player(1);
         frame.add(pongPanel, BorderLayout.CENTER);
 
         frame.setSize(500, 500);

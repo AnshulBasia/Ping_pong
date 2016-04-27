@@ -5,8 +5,8 @@ import javax.swing.*;
 public class SwingControlDemo {
 
    private JFrame mainFrame;
-   private JLabel headerLabel  = new JLabel("",JLabel.CENTER );;
-   private JLabel statusLabel= new JLabel("",JLabel.CENTER); ;
+   private JLabel headerLabel  = new JLabel("",JLabel.CENTER );
+   private JLabel statusLabel= new JLabel("",JLabel.CENTER); 
    private JPanel controlPanel;
    JButton single = new JButton("Single Player");
    JButton multi = new JButton("Multiplayer");
@@ -20,19 +20,50 @@ public class SwingControlDemo {
    	JButton proceed = new JButton("Continue");
    	JTextField port_rivals=new JTextField("Enter port to connect to",20);
    	
-   	
+   	JFrame frame = new JFrame("Pong");
 
+   JButton play_again = new JButton("PLAY AGIAN");
+ 
+   static SwingControlDemo swingControlDemo ;  
    /*public SwingControlDemo(){
       prepareGUI();
    }*/
 
+   public void start(int level)
+   {
+
+   		
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLayout(new BorderLayout());
+
+        single_player pongPanel = new single_player(level);
+        frame.add(pongPanel, BorderLayout.CENTER);
+
+
+        frame.setSize(500, 500);
+        frame.setVisible(true);
+   }
+
    public static void main(String[] args){
-      SwingControlDemo swingControlDemo = new SwingControlDemo();  
+   	 swingControlDemo = new SwingControlDemo();  
+      
       swingControlDemo.showEventDemo();       
    }
+
+   public void exit(int score,int lives){
+
+   	frame.setVisible(false);
+
+   	prepareGUI();
+   	play_again.setActionCommand("again");
+   	play_again.setBackground(Color.YELLOW);
+   	play_again.addActionListener(new ButtonClickListener()); 
+   	controlPanel.add(play_again);
+   	controlPanel.add(headerLabel);
+   }
       
-   private void prepareGUI(){
-      mainFrame = new JFrame("Java SWING Examples");
+   public void prepareGUI(){
+      mainFrame = new JFrame("Ping Pong");
       mainFrame.setSize(1200,600);
       mainFrame.setLayout(new GridLayout(3, 1));
 
@@ -49,6 +80,7 @@ public class SwingControlDemo {
          }        
       });    
       controlPanel = new JPanel();
+     // gridBackLayout gc= new GridBackLayout();
       controlPanel.setLayout(new FlowLayout());
 
       mainFrame.add(headerLabel);
@@ -63,8 +95,19 @@ public class SwingControlDemo {
       headerLabel.setText("Welcome To ping pong Game"); 
 
       prepareGUI();
+      JTextArea textArea = new JTextArea(
+    "This is an editable JTextArea. " +
+    "A text area is a \"plain\" text component, " +
+    "which means that although it can display text " +
+    "in any font, all of the text is in the same font."
+	);
+	textArea.setFont(new Font("Serif", Font.ITALIC, 16));
+	//textArea.setLineWrap(true);
+	//textArea.setWrapStyleWord(true);
 
-     
+	
+
+    
 
       
       
@@ -85,6 +128,8 @@ public class SwingControlDemo {
       
       controlPanel.add(single);
       controlPanel.add(multi);
+      controlPanel.add(new JSeparator(SwingConstants.VERTICAL));
+      controlPanel.add(textArea);
           
 
       mainFrame.setVisible(true);  
@@ -148,17 +193,18 @@ public class SwingControlDemo {
          else if(command.equals( "easy" )){
          	statusLabel.setText("easy");
          	System.out.println("Easy");
-         	//Function to start the game
+
+         	start(1);//Function to start the game
          }
          else if(command.equals( "medium" )){
          	statusLabel.setText("medium");
          	System.out.println("Medium");
-         	//Function to start the game
+         	start(2);//Function to start the game
          }
          else if(command.equals( "difficult" )){
          	statusLabel.setText("difficult");
          	System.out.println("difficult");
-         	//Function to start the game
+         	start(3);//Function to start the game
          }
          else if(command.equals( "proceed" )){
          	statusLabel.setText("Starting the Game");
@@ -184,6 +230,10 @@ public class SwingControlDemo {
       		controlPanel.remove(back2);
       		showEventDemo();
 
+         }
+         else if(command.equals("again")){
+         	controlPanel.remove(play_again);
+         	swingControlDemo.showEventDemo();           
          }
          else  {
             statusLabel.setText("Cancel Button clicked.");
