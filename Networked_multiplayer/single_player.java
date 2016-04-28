@@ -123,7 +123,7 @@ public class single_player extends JPanel implements ActionListener, KeyListener
     	 
 
     	 SwingControlDemo exit = new SwingControlDemo();  
-    	 exit.exit(playerOneScore,playerOneLives);
+    	 exit.exit(playerOneLives);
 
     }
 

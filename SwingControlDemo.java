@@ -8,6 +8,7 @@ public class SwingControlDemo {
    private JLabel headerLabel  = new JLabel("",JLabel.CENTER );
    private JLabel statusLabel= new JLabel("",JLabel.CENTER); 
    private JPanel controlPanel;
+   JPanel quit;
    JButton single = new JButton("Single Player");
    JButton multi = new JButton("Multiplayer");
    JButton easy=new JButton("EASY");
@@ -29,13 +30,23 @@ public class SwingControlDemo {
       prepareGUI();
    }*/
 
+
+   public void set_quit(JFrame frame)
+   {
+   	quit=new JPanel();
+   	frame.add(quit);
+   	frame.add(single);
+
+
+   }
+
    public void start(int level)
    {
 
    		
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
-
+        
         single_player pongPanel = new single_player(level);
         frame.add(pongPanel, BorderLayout.CENTER);
 

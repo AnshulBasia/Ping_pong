@@ -18,6 +18,8 @@ import javax.swing.Timer;
 import java.util.*;
 
 public class twoplayer1 extends JPanel implements ActionListener, KeyListener, Runnable{
+
+	public boolean qpressed=false;
     public int looptimer=0;
     public int waittimer=-1;
     private DatagramSocket socket;
@@ -106,11 +108,12 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
     private int playerFourY = 250;                               // this represents the topmost coordinated of bat
     private int playerFourWidth = 10;
     private int playerFourHeight = 50;
+    int lives=10;
 
-    private int playerlvScore = 0;
-    private int playerdhScore = 0;
-    private int playerrvScore = 0;
-    private int playeruhScore = 0;
+    private int playerlvLives = lives;
+    private int playerdhLives = lives;
+    private int playerrvLives = lives;
+    private int playeruhLives = lives;
 
     private boolean islv=false;
     private boolean isdh=false;
@@ -349,7 +352,6 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                     ballX=240;
                     ballY=240;
 		    reset_AI();
-
                 }
                 else if(msg.equals("1"))
                 {
@@ -388,6 +390,11 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
 
 
     public void step(){
+
+    	if(qpressed)
+    	{
+    		System.out.println("quitting");
+    	}
 
         //where will the ball be after it moves?
         float nextBallLeft = ballX + ballDeltaX;
@@ -514,8 +521,9 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                 ballY = 240;
                 ballDeltaX = 0;
                 ballDeltaY = 0;
+                playerlvLives--;
                 //send a message for telling to increse the score and 
-                //also to plce the ball again at centre
+                //also to place the ball again at centre
 		reset_AI();
                 
             }
@@ -585,6 +593,7 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                 ballY = 240;
                 ballDeltaX = 0;
                 ballDeltaY = 0;
+                playerdhLives--;
                 //send a message for telling to increse the score and 
                 //also to place the ball again at centre
 		reset_AI();
@@ -656,6 +665,7 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                 ballDeltaY = 0;
                 //send a message for telling to increse the score and 
                 //also to place the ball again at centre
+                playerrvLives--;
 		reset_AI();
                 
             }
@@ -723,6 +733,7 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                 ballY = 240;
                 ballDeltaX = 0;
                 ballDeltaY = 0;
+                playeruhLives--;
                 //send a message for telling to increse the score and 
                 //also to place the ball again at centre
 		reset_AI();                
@@ -880,6 +891,7 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                 ballY = 240;
                 ballDeltaX = 0;
                 ballDeltaY = 0;
+                playerdhLives--;
 		reset_AI();                              
                 
             }
@@ -938,6 +950,7 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                 ballY = 240;
                 ballDeltaX = 0;
                 ballDeltaY = 0;
+                playerrvLives--;
                 //send a message for telling to increse the score and 
                 //also to place the ball again at centre
 		reset_AI();
@@ -999,6 +1012,7 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                 ballY = 240;
                 ballDeltaX = 0;
                 ballDeltaY = 0;
+                playeruhLives--;
                 //send a message for telling to increse the score and 
                 //also to place the ball again at centre
 		reset_AI();                 
@@ -1062,6 +1076,7 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                 ballY = 240;
                 ballDeltaX = 0;
                 ballDeltaY = 0;
+                playerlvLives--;
                 //send a message for telling to increse the score and 
                 //also to place the ball again at centre
                 
@@ -1170,6 +1185,15 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
         g.fillRect(playerTwoX, playerTwoY, playerTwoWidth, playerTwoHeight);
         g.fillRect(playerThreeX, playerThreeY, playerThreeWidth, playerThreeHeight);*/
         //g.fillRect(playerFourX, playerFourY, playerFourWidth, playerFourHeight);
+
+         g.setColor(Color.WHITE);
+         g.setFont(new Font(Font.DIALOG, Font.BOLD, 16));
+       	 g.drawString("1-  "+String.valueOf(playeruhLives), 250, 100);
+       	 g.drawString("2-  "+String.valueOf(playerrvLives), 400, 250);
+       	 g.drawString("3-  "+String.valueOf(playerlvLives), 100, 250);
+       	 g.drawString("4-  "+String.valueOf(playerdhLives), 250, 400);
+
+         
     }
 
     public void keyTyped(KeyEvent e) {}
@@ -1194,6 +1218,9 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
         }
         else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
             rightPressed = true;
+        }
+        else if(e.getKeyCode()==KeyEvent.VK_Q){
+        	qpressed=true;
         }
     }
 

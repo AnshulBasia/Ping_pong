@@ -66,7 +66,7 @@ public class single_player extends JPanel implements ActionListener, KeyListener
     private int paddleSpeed = 5; 
     int comp_paddle;       //represents speed of the bat
 
-    private int playerOneLives = 10;
+    private int playerOneScore = 0;
     
     int i=0;
     int temp=0;
@@ -79,7 +79,7 @@ public class single_player extends JPanel implements ActionListener, KeyListener
     boolean success=false;
    
    
-   
+   int playerOneLives=15;
    
    
    int freeze=0;
@@ -161,7 +161,7 @@ public class single_player extends JPanel implements ActionListener, KeyListener
 
                 //System.out.println("  "+a+22.5+"ww "+ballDeltaX+" "+ballDeltaY);
                 if(level==2){ballDeltaX*=1.3;ballDeltaY*=1.3;}
-			   if(level==3){ballDeltaX*=2.5;ballDeltaY*=2.5;}
+			   if(level==3){ballDeltaX*=2.5;ballDeltaY*=1.8;}
                temp_x=ballDeltaX;
 /*
                 
@@ -173,7 +173,7 @@ public class single_player extends JPanel implements ActionListener, KeyListener
                 else{ballDeltaY-=3;}
                 
                 */
-                
+                playerOneLives--;
                 edge=false;
 
 
@@ -209,7 +209,7 @@ public class single_player extends JPanel implements ActionListener, KeyListener
     public void step(){
 
 
-    	if(qpressed||playerOneLives<=0){
+    	if(qpressed){
     		exit();
     	}
         
@@ -421,7 +421,7 @@ public class single_player extends JPanel implements ActionListener, KeyListener
                  temp=i;
                 splpwrX=-10000;
     		    splpwrY=-10000;
-    		   // playerOneScore+=5;
+    		    playerOneScore+=5;
             }
             else {
                 success=false;
@@ -466,7 +466,7 @@ public class single_player extends JPanel implements ActionListener, KeyListener
         g.setFont(new Font(Font.DIALOG, Font.BOLD, 16));
         g.drawString("boost  "+String.valueOf(boost), 100, 100);
        
-        g.drawString("lives="+String.valueOf(playerOneLives), 100, 400);
+        g.drawString(String.valueOf(playerOneLives), 100, 400);
        
 
         //draw the ball
