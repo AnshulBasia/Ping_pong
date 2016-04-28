@@ -391,9 +391,70 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
 
     public void step(){
 
+    	 if(location.equals("lv")&&playerlvLives<=0)
+    	 {
+    	 	System.out.println("YOU LOST");
+    	 	qpressed=true;
+
+    	 }
+    	  if(location.equals("dh")&&playerdhLives<=0)
+    	 {
+    	 	System.out.println("YOU LOST");
+    	 	qpressed=true;
+    	 	
+    	 }
+    	 	 if(location.equals("uh")&&playeruhLives<=0)
+    	 {
+    	 	System.out.println("YOU LOST");
+    	 	qpressed=true;
+    	 	
+    	 }
+    	  if(location.equals("rv")&&playerrvLives<=0)
+    	 {
+    	 	System.out.println("YOU LOST");
+    	 	qpressed=true;
+    	 	
+    	 }
     	if(qpressed)
     	{
     		System.out.println("quitting");
+            if(location.equals("lv")){
+            	try{
+            sendTo(address,"lv_quit");
+            sendTo(address2,"lv_quit");
+        }catch(IOException e){System.out.println("exception");}
+            SwingControlDemo exit = new SwingControlDemo();  
+    	 	exit.exit(playerlvLives);
+            }
+            if(location.equals("dh")){
+            	try{
+            sendTo(address,"dh_quit");
+            sendTo(address2,"dh_quit");
+            }catch(IOException e){System.out.println("exception");}
+            SwingControlDemo exit = new SwingControlDemo();  
+    	 	exit.exit(playerdhLives);
+            }
+            if(location.equals("rv")){
+            	try{
+            sendTo(address,"rv_quit");
+            sendTo(address2,"rv_quit");
+            }catch(IOException e){System.out.println("exception");}
+            SwingControlDemo exit = new SwingControlDemo();  
+    		 exit.exit(playerrvLives);
+            }
+            if(location.equals("uh")){
+            	try{
+            sendTo(address,"uh_quit");
+            sendTo(address2,"uh_quit");
+            }catch(IOException e){System.out.println("exception");}
+            
+            SwingControlDemo exit = new SwingControlDemo();  
+    	 	exit.exit(playeruhLives);
+            }
+
+            qpressed=false;
+            location="lu";
+            
     	}
 
         //where will the ball be after it moves?

@@ -213,6 +213,9 @@ public class SwingControlDemo {
    	controlPanel.add(play_again);
    	controlPanel.add(headerLabel);
    	controlPanel.add(score);
+   	frame.dispose();
+
+   	frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
 
 
    }
