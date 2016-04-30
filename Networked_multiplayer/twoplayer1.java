@@ -14,6 +14,7 @@ import java.awt.event.KeyListener;
 
 import javax.swing.JPanel;
 import javax.swing.Timer;
+import java.net.*;
 
 import java.util.*;
 
@@ -24,10 +25,7 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
     public int waittimer=-1;
     private DatagramSocket socket;
     private boolean running;
-    private InetSocketAddress address;
-    private InetSocketAddress address2;
-    public int destinationport1;
-    public int destinationport2;
+    public static ArrayList<InetSocketAddress> addresses = new ArrayList<>();
     public int sourceport;
     private boolean startgameforeign=false;
     public boolean startgamelocal=false;
@@ -123,12 +121,41 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
     public String positionmsg="";
 
     int deviation=0;
+
+
+    //%%%
+    int boost=200;
+    boolean shiftpressed=false;
+    int iteration=0;
+    boolean uh_present=true;
+    boolean lv_present=false;
+    boolean rv_present=false;
+    boolean dh_present=false;
+    int uh_y=250;
+    int lv_x=250;
+    int rv_x=250;
+    int dh_y=250;
+    boolean uh_start=false;
+    boolean dh_start=false;
+    boolean lv_start=false;
+    boolean rv_start=false;
+    int coord_uh=1000;
+    int coord_dh=-1000;
+    int coord_lv=1000;
+    int coord_rv=-1000;
+    int temp_uh=-500000;
+    int temp_dh=-50000;
+    int temp_lv=-50000;
+    int temp_rv=-50000;
+
+    //%%%
     
 
 
     //construct a PongPanel
-    public twoplayer1(String a){
+    public twoplayer1(String a, int b){
         location=a;
+        sourceport=b;
         Color backColor = new Color(4, 2, 54);
         setBackground(backColor);
         if(location.equals("lv")){
@@ -183,10 +210,9 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
         socket.close();
     }
 
-    public void getaddress(InetSocketAddress addresspassed, InetSocketAddress addresspassed2)
+    public void getaddress(ArrayList<InetSocketAddress> addressespassed)
     {
-        address=addresspassed;
-        address2=addresspassed2;   
+        addresses=addressespassed;  
     }
 
     
@@ -221,15 +247,31 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
         }
         return c;
     }
-    public void getdestinationports(int a, int b)
+
+    public void addAddress(String dip, int dport)
     {
-        destinationport1=a;
-        destinationport2=b;
+        InetSocketAddress address = new InetSocketAddress(dip, dport);
+        System.out.println(" >>>>> "+ address.getHostString());
+        boolean a = true;
+        for (int i=0;i<addresses.size();i++)
+        {
+            
+            if(dip.equals(addresses.get(i).getHostString()))
+                a=false;
+
+        }
+        if(a)
+        {
+            addresses.add(address);
+            System.out.println("added");    
+        }
+        
     }
+    
     @Override
     public void run()
     {
-        byte[] buffer = new byte[1024];
+        byte[] buffer = new byte[128];
         DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
         
         running = true;
@@ -241,6 +283,45 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                 
                 String msg = new String(buffer, 0, packet.getLength());
                 System.out.println(msg);// iski jagah positions yahan banani hain
+                String sourceIP=Inet4Address.getLocalHost().getHostAddress();
+                
+                  
+                      
+                //System.out.println(msg.substring(0,3));
+                
+                if(msg.length()>4&&msg.substring(0,4).equals("add1"))
+                {
+                    String address[]=msg.split("_");
+                    String IP=address[1];
+                    int port=Integer.parseInt(address[2]);
+                     
+                    int n= addresses.size();
+                    
+                       addAddress(IP,port);
+                    n= addresses.size();
+                    //Main mm=new Main();
+                    //mm.addAddress(IP,port);
+                    System.out.println(n);
+                    for(int i=0;i<n-1;i++){
+                        InetSocketAddress tempaddress=addresses.get(i);
+                        String msg2="add2_"+IP+"_"+port;
+                        String msg3="add2_"+tempaddress.getHostString()+"_"+tempaddress.getPort();
+                        sendTo(tempaddress,msg2);
+                        sendTo(addresses.get(addresses.size()-1),msg3);
+                    //System.out.println("Message sent to : "+ i );
+                    }
+                }
+                else if(msg.length()>4&&msg.substring(0,4).equals("add2"))
+                {
+                    String address[]=msg.split("_");
+                    String IP=address[1];
+                    System.out.println(addresses.size());
+                    int port=Integer.parseInt(address[2]);
+                    addAddress(IP,port);
+                }
+                
+                                
+
                 if(countdashes(msg)==2)
                 {
                     String coordinates[]=msg.split("_");
@@ -280,10 +361,10 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                 }
                 else if(msg.equals("play"))
                 {
-                    startgameforeign=true;
+                    startgamelocal=true;
                     System.out.println("play recieved here");
                 }
-                if(countdashes(msg)==4)
+                if(countdashes(msg)==6)
                 //else
                 {
                     String coordinates[]=msg.split("_");
@@ -296,8 +377,13 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                         lvY=Integer.parseInt(tempycoordinates);
                         String balldeltax=coordinates[3];
                         String balldeltay=coordinates[4];
+                        String ballx=coordinates[5];
+                        String bally=coordinates[6];
                         ballDeltaX=Integer.parseInt(balldeltax);
                         ballDeltaY=Integer.parseInt(balldeltay);
+                        ballX=Integer.parseInt(ballx);
+                        ballY=Integer.parseInt(bally);
+                        
                         System.out.println("ball collision msg recieved");
                 
                     }
@@ -307,13 +393,16 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                         String tempycoordinates=coordinates[2];
                         dhX=Integer.parseInt(tempxcoordinates);
                         dhY=Integer.parseInt(tempycoordinates);
-                        //playerThreeY=Integer.parseInt(sycoordinates2);
-                        //440 change hoga
-                        //playerThreeX+=440;
+                       
                         String balldeltax=coordinates[3];
                         String balldeltay=coordinates[4];
+                        String ballx=coordinates[5];
+                        String bally=coordinates[6];
                         ballDeltaX=Integer.parseInt(balldeltax);
                         ballDeltaY=Integer.parseInt(balldeltay);
+                        ballX=Integer.parseInt(ballx);
+                        ballY=Integer.parseInt(bally);
+                        
                         System.out.println("ball collision msg recieved");
                     } 
                     if(coordinates[0].equals("rv"))
@@ -324,8 +413,12 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                         rvY=Integer.parseInt(tempycoordinates);
                         String balldeltax=coordinates[3];
                         String balldeltay=coordinates[4];
+                        String ballx=coordinates[5];
+                        String bally=coordinates[6];
                         ballDeltaX=Integer.parseInt(balldeltax);
                         ballDeltaY=Integer.parseInt(balldeltay);
+                        ballX=Integer.parseInt(ballx);
+                        ballY=Integer.parseInt(bally);
                         System.out.println("ball collision msg recieved");
                 
                     }
@@ -340,8 +433,12 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                         //playerThreeX+=440;
                         String balldeltax=coordinates[3];
                         String balldeltay=coordinates[4];
+                        String ballx=coordinates[5];
+                        String bally=coordinates[6];
                         ballDeltaX=Integer.parseInt(balldeltax);
                         ballDeltaY=Integer.parseInt(balldeltay);
+                        ballX=Integer.parseInt(ballx);
+                        ballY=Integer.parseInt(bally);
                         System.out.println("ball collision msg recieved");
                     }
                 }
@@ -391,6 +488,24 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
 
     public void step(){
 
+    	//%%%
+    	iteration++;
+    	if(shiftpressed && boost>=2) {
+        	boost-=2;
+        	paddleSpeed=20;
+         }
+         else{
+         	paddleSpeed=10;
+         }
+         if(!shiftpressed&&iteration%12==0){
+         	paddleSpeed=10;
+         	if(boost<=199 )
+         	{boost+=1;}
+         }
+
+
+    	//%%%
+
     	 if(location.equals("lv")&&playerlvLives<=0)
     	 {
     	 	System.out.println("YOU LOST");
@@ -420,41 +535,66 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
     		System.out.println("quitting");
             if(location.equals("lv")){
             	try{
-            sendTo(address,"lv_quit");
-            sendTo(address2,"lv_quit");
-        }catch(IOException e){System.out.println("exception");}
+                    int n= addresses.size();
+                    for(int i=0;i<n;i++){
+                        InetSocketAddress tempaddress=addresses.get(i);
+                        sendTo(tempaddress,"lv_quit");
+                    }
+                }
+                catch(IOException e){
+                    System.out.println("exception");
+                }
             SwingControlDemo exit = new SwingControlDemo();  
     	 	exit.exit(playerlvLives);
             }
+
             if(location.equals("dh")){
             	try{
-            sendTo(address,"dh_quit");
-            sendTo(address2,"dh_quit");
-            }catch(IOException e){System.out.println("exception");}
-            SwingControlDemo exit = new SwingControlDemo();  
-    	 	exit.exit(playerdhLives);
+                    int n= addresses.size();
+                    for(int i=0;i<n;i++){
+                        InetSocketAddress tempaddress=addresses.get(i);
+                        sendTo(tempaddress,"dh_quit");
+                    }
+                }
+                catch(IOException e){
+                    System.out.println("exception");
+                }
+            //SwingControlDemo exit = new SwingControlDemo();  
+    	 	//exit.exit(playerdhLives);
             }
+
             if(location.equals("rv")){
             	try{
-            sendTo(address,"rv_quit");
-            sendTo(address2,"rv_quit");
-            }catch(IOException e){System.out.println("exception");}
-            SwingControlDemo exit = new SwingControlDemo();  
-    		 exit.exit(playerrvLives);
+                    int n= addresses.size();
+                    for(int i=0;i<n;i++){
+                        InetSocketAddress tempaddress=addresses.get(i);
+                        sendTo(tempaddress,"rv_quit");
+                    }
+                }
+                catch(IOException e){
+                    System.out.println("exception");
+                }
+            //SwingControlDemo exit = new SwingControlDemo();  
+    		 //exit.exit(playerrvLives);
             }
+
             if(location.equals("uh")){
             	try{
-            sendTo(address,"uh_quit");
-            sendTo(address2,"uh_quit");
-            }catch(IOException e){System.out.println("exception");}
-            
-            SwingControlDemo exit = new SwingControlDemo();  
-    	 	exit.exit(playeruhLives);
+                    int n= addresses.size();
+                    for(int i=0;i<n;i++){
+                        InetSocketAddress tempaddress=addresses.get(i);
+                        sendTo(tempaddress,"uh_quit");
+                    }
+                }catch(IOException e){
+                    System.out.println("exception");
+                }
+
+            //SwingControlDemo exit = new SwingControlDemo();  
+    	 	//exit.exit(playeruhLives);
             }
 
             qpressed=false;
-            location="lu";
-            
+            location="lu";   
     	}
 
         //where will the ball be after it moves?
@@ -470,8 +610,11 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
             ballDeltaY=initialballDeltaY;
             waittimer=-1;
             try{
-                sendTo(address,"1");
-                sendTo(address2,"1");
+                    int n= addresses.size();  
+                    for(int i=0;i<n;i++){
+                    InetSocketAddress tempaddress=addresses.get(i);
+                    sendTo(tempaddress,"1");
+                }
             }
             catch(IOException e)
             {
@@ -514,16 +657,15 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
         {
             uh(nextBallLeft, nextBallRight, nextBallTop, nextBallBottom);
         }
-        
-        /*if (nextBallTop < 0 || nextBallBottom > getHeight()) {
-          //if (nextBallBottom>getHeight()){
-            ballDeltaY *= -1;
-        }*/
     
         try
         {
-        sendTo(address,positionmsg);
-        sendTo(address2,positionmsg);    
+            int n= addresses.size();  
+            for(int i=0;i<n;i++){
+            InetSocketAddress tempaddress=addresses.get(i);
+            sendTo(tempaddress,positionmsg);
+            }   
+    
         }
         catch(IOException e)
         {
@@ -569,8 +711,11 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
 
                // playerTwoScore ++;
                 try{
-                    sendTo(address,"0");
-                    sendTo(address2,"0");
+                    int n= addresses.size();  
+                    for(int i=0;i<n;i++){
+                        InetSocketAddress tempaddress=addresses.get(i);
+                        sendTo(tempaddress,"0");
+                    }
                 }
                 catch(IOException e)
                 {
@@ -609,14 +754,17 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                 }
 
                 String positionballmsg="";
-                positionballmsg=positionballmsg+"lv"+"_"+localplayerX+"_"+localplayerY+"_"+ballDeltaX+"_"+ballDeltaY;
+                positionballmsg=positionballmsg+"lv"+"_"+localplayerX+"_"+localplayerY+"_"+ballDeltaX+"_"+ballDeltaY+"_"+ballX+"_"+ballY;
                 //System.out.println(positionballmsg+" "+looptimer++);
                 //System.out.println(ballX+" "+ballY);
                 try
                 {
                     System.out.println("entered try");
-                    sendTo(address,positionballmsg);
-                    sendTo(address2,positionballmsg);    
+                    int n= addresses.size();  
+                    for(int i=0;i<n;i++){
+                        InetSocketAddress tempaddress=addresses.get(i);
+                        sendTo(tempaddress,positionballmsg);
+                    } 
                 }
                 catch(IOException e)
                 {
@@ -642,8 +790,11 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
 
                // playerTwoScore ++;
                 try{
-                    sendTo(address,"0");
-                    sendTo(address2,"0");
+                    int n= addresses.size();  
+                    for(int i=0;i<n;i++){
+                        InetSocketAddress tempaddress=addresses.get(i);
+                        sendTo(tempaddress,"0");
+                    }
                 }
                 catch(IOException e)
                 {
@@ -681,12 +832,15 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                     else{ballDeltaX=-1*Math.abs(temp_x);}
                 }
                 String positionballmsg="";
-                positionballmsg=positionballmsg+"dh"+"_"+localplayerX+"_"+localplayerY+"_"+ballDeltaX+"_"+ballDeltaY;
+                positionballmsg=positionballmsg+"dh"+"_"+localplayerX+"_"+localplayerY+"_"+ballDeltaX+"_"+ballDeltaY+"_"+ballX+"_"+ballY;
                 try
                 {
                     System.out.println("entered try");
-                    sendTo(address,positionballmsg);
-                    sendTo(address2,positionballmsg);    
+                    int n= addresses.size();  
+                    for(int i=0;i<n;i++){
+                        InetSocketAddress tempaddress=addresses.get(i);
+                        sendTo(tempaddress,positionballmsg);
+                    }  
                 }
                 catch(IOException e)
                 {
@@ -712,8 +866,11 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
 
                // playerTwoScore ++;
                 try{
-                    sendTo(address,"0");
-                    sendTo(address2,"0");
+                    int n= addresses.size();  
+                    for(int i=0;i<n;i++){
+                        InetSocketAddress tempaddress=addresses.get(i);
+                        sendTo(tempaddress,"0");
+                    }
                 }
                 catch(IOException e)
                 {
@@ -752,12 +909,15 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                 }
 
                 String positionballmsg="";
-                positionballmsg=positionballmsg+"rv"+"_"+localplayerX+"_"+localplayerY+"_"+ballDeltaX+"_"+ballDeltaY;
+                positionballmsg=positionballmsg+"rv"+"_"+localplayerX+"_"+localplayerY+"_"+ballDeltaX+"_"+ballDeltaY+"_"+ballX+"_"+ballY;
                 try
                 {
                     System.out.println("entered try");
-                    sendTo(address,positionballmsg);
-                    sendTo(address2,positionballmsg);    
+                    int n= addresses.size();  
+                    for(int i=0;i<n;i++){
+                        InetSocketAddress tempaddress=addresses.get(i);
+                        sendTo(tempaddress,positionballmsg);
+                    }   
                 }
                 catch(IOException e)
                 {
@@ -782,8 +942,11 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
 
                // playerTwoScore ++;
                 try{
-                    sendTo(address,"0");
-                    sendTo(address2,"0");
+                    int n= addresses.size();  
+                    for(int i=0;i<n;i++){
+                        InetSocketAddress tempaddress=addresses.get(i);
+                        sendTo(tempaddress,"0");
+                    }
                 }
                 catch(IOException e)
                 {
@@ -821,12 +984,15 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                 }
                 
                 String positionballmsg="";
-                positionballmsg=positionballmsg+"uh"+"_"+localplayerX+"_"+localplayerY+"_"+ballDeltaX+"_"+ballDeltaY;
+                positionballmsg=positionballmsg+"uh"+"_"+localplayerX+"_"+localplayerY+"_"+ballDeltaX+"_"+ballDeltaY+"_"+ballX+"_"+ballY;
                 try
                 {
                     System.out.println("entered try");
-                    sendTo(address,positionballmsg);
-                    sendTo(address2,positionballmsg);    
+                    int n= addresses.size();  
+                    for(int i=0;i<n;i++){
+                        InetSocketAddress tempaddress=addresses.get(i);
+                        sendTo(tempaddress,positionballmsg);
+                    }   
                 }
                 catch(IOException e)
                 {
@@ -904,13 +1070,13 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
 
 	public void reset_AI(){
 		playerOneX = 250;                                
-	        playerOneY = 475;
+	    playerOneY = 475;
 		playerTwoX = 475;
-                playerTwoY = 250;
+        playerTwoY = 250;
 		playerThreeX = 250;                          
-                playerThreeY = 15;
+        playerThreeY = 15;
 		playerFourX = 15;                                  
-                playerFourY = 250;   
+        playerFourY = 250;   
 
                                                           
 	}
@@ -1254,6 +1420,197 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
        	 g.drawString("3-  "+String.valueOf(playerlvLives), 100, 250);
        	 g.drawString("4-  "+String.valueOf(playerdhLives), 250, 400);
 
+       	  //%%%
+       	 g.setFont(new Font(Font.DIALOG, Font.BOLD, 10));
+       	 g.drawString("Boost-  "+String.valueOf(boost), 250, 250);
+
+       	 g.setColor(Color.RED);
+
+       	 if(location.equals("uh"))
+       	 {
+
+       		 if(iteration%400==0)
+       	 	{	System.out.println(iteration);
+       	 		uh_start=true;
+       	 		 coord_uh=(iteration%250)+100;
+       	 	
+       	 	}
+       	 	if(uh_start)
+       	 	{
+       	 		g.fillRect(coord_uh,uh_y,5,5);
+       	 		uh_y-=2;
+       	 	}
+
+
+       	 	//Detect collision from uh and set uh_start=false and temp_uh 		uhX, uhY, uhWidth, uhHeight,
+
+       	 	if(uh_y<=playerThreeY+uhHeight)
+       	 	{
+       	 		if(coord_uh>localplayerX&&coord_uh<localplayerX+uhWidth)
+       	 		{
+       	 			
+       	 			temp_uh=iteration;
+       	 			System.out.println("xD"+temp_uh);
+       	 		}
+       	 		uh_start=false;
+       	 		uh_y=250;
+       	 		System.out.println("xD"+coord_uh+" "+playerThreeX+" "+uhX+" "+localplayerX);
+       	 		
+       	 	}
+
+       	 	if(iteration-temp_uh<=100)
+       	 	{
+       	 		localplayerWidth=100;
+       	 	}
+       	 	else
+       	 	{
+       	 		localplayerWidth=50;
+       	 	}
+
+       	 }
+
+       	 if(location.equals("dh"))
+       	 {
+
+       		 if(iteration%400==100)
+       	 	{	System.out.println(iteration);
+       	 		dh_start=true;
+       	 		 coord_dh=(iteration%250)+100;
+       	 	
+       	 	}
+       	 	if(dh_start)
+       	 	{
+       	 		g.fillRect(coord_dh,dh_y,5,5);
+       	 		dh_y+=2;
+       	 	}
+
+
+       	 	//Detect collision from uh and set uh_start=false and temp_uh 		uhX, uhY, uhWidth, uhHeight,
+
+       	 	if(dh_y>=playerOneY)
+       	 	{
+       	 		if(coord_dh>localplayerX&&coord_dh<localplayerX+dhWidth)
+       	 		{
+       	 			
+       	 			temp_dh=iteration;
+       	 			System.out.println("xD"+temp_dh);
+       	 		}
+       	 		dh_start=false;
+       	 		dh_y=250;
+       	 		System.out.println("xD"+coord_dh+" "+playerOneX+" "+dhX+" "+localplayerX);
+       	 		
+       	 	}
+
+       	 	if(iteration-temp_dh<=100)
+       	 	{
+       	 		localplayerWidth=100;
+       	 	}
+       	 	else
+       	 	{
+       	 		localplayerWidth=50;
+       	 	}
+
+       	 }
+
+       	  if(location.equals("lv"))
+       	 {
+
+       		 if(iteration%400==200)
+       	 	{	System.out.println(iteration);
+       	 		lv_start=true;
+       	 		 coord_lv=(iteration%250)+100;
+       	 	
+       	 	}
+       	 	if(lv_start)
+       	 	{
+       	 		g.fillRect(lv_x,coord_lv,5,5);
+       	 		lv_x-=2;
+       	 	}
+
+
+       	 	//Detect collision from uh and set uh_start=false and temp_uh 		uhX, uhY, uhWidth, uhHeight,
+
+       	 	if(lv_x<=playerFourX+playerFourWidth)
+       	 	{
+       	 		if(coord_lv>localplayerY&&coord_lv<localplayerY+playerFourHeight)
+       	 		{
+       	 			
+       	 			temp_lv=iteration;
+       	 			System.out.println("xD"+temp_lv);
+       	 		}
+       	 		lv_start=false;
+       	 		lv_x=250;
+       	 		System.out.println("xD"+coord_lv+" "+playerFourX+" "+uhX+" "+localplayerX);
+       	 		
+       	 		
+       	 	}
+
+       	 	if(iteration-temp_lv<=100)
+       	 	{
+       	 		localplayerHeight=100;
+       	 		
+       	 	}
+       	 	else
+       	 	{
+       	 		localplayerHeight=50;
+       	 	}
+
+       	 }
+
+       	  if(location.equals("rv"))
+       	 {
+
+       		 if(iteration%300==0)
+       	 	{	System.out.println(iteration);
+       	 		rv_start=true;
+       	 		 coord_rv=(iteration%250)+100;
+       	 	
+       	 	}
+       	 	if(rv_start)
+       	 	{
+       	 		g.fillRect(rv_x,coord_rv,5,5);
+       	 		rv_x+=2;
+       	 	}
+
+
+       	 	//Detect collision from uh and set uh_start=false and temp_uh 		uhX, uhY, uhWidth, uhHeight,
+
+       	 	if(rv_x>=playerTwoX)
+       	 	{
+       	 		if(coord_rv>localplayerY&&coord_rv<localplayerY+playerFourHeight)
+       	 		{
+       	 			
+       	 			temp_rv=iteration;
+       	 			System.out.println("xD"+temp_rv);
+       	 		}
+       	 		rv_start=false;
+       	 		rv_x=250;
+       	 		System.out.println("xD"+coord_rv+" "+playerFourX+" "+uhX+" "+localplayerX);
+       	 		
+       	 		
+       	 	}
+
+       	 	if(iteration-temp_rv<=100)
+       	 	{
+       	 		localplayerHeight=100;
+       	 		
+       	 	}
+       	 	else
+       	 	{
+       	 		localplayerHeight=50;
+       	 	}
+
+       	 }
+
+
+
+
+
+
+
+       	 //%%%
+
+
          
     }
 
@@ -1283,6 +1640,11 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
         else if(e.getKeyCode()==KeyEvent.VK_Q){
         	qpressed=true;
         }
+         //%%%
+        else if(e.getKeyCode()==KeyEvent.VK_SHIFT){
+        	shiftpressed=true;
+        }
+        //%%%
     }
 
 
@@ -1305,6 +1667,11 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
         else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
             rightPressed = false;
         }
+         //%%%
+        else if(e.getKeyCode()==KeyEvent.VK_SHIFT){
+        	shiftpressed=false;
+        }
+        //%%%
     }
 
 }

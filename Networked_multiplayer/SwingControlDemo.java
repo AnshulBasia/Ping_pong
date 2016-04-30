@@ -12,10 +12,12 @@ import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.util.Scanner;
-
+import java.util.*;
+import java.net.*;
 public class SwingControlDemo {
 
    static JFrame mainFrame;
+   int problem=0;
     static  JTextField score= new JTextField("score",20);
    static JLabel headerLabel  = new JLabel("arbit text",JLabel.CENTER );
    static JLabel statusLabel= new JLabel("",JLabel.CENTER); 
@@ -40,12 +42,39 @@ public class SwingControlDemo {
    static JButton play_again = new JButton("PLAY AGIAN");
  
    static SwingControlDemo swingControlDemo ;  
-   static String number[]={"1","2","3","4"};
- 
+   static String number[]={"1","2","3"};
+ 	int ai_level=3;
   static JComboBox no_of_players=new JComboBox(number);
    /*public SwingControlDemo(){
       prepareGUI();
    }*/
+
+   public static ArrayList<Integer> destinationPorts = new ArrayList<>();
+    public static ArrayList<String> destinationIPs = new ArrayList<>();
+    public static ArrayList<InetSocketAddress> addresses = new ArrayList<>();
+    public void addAddress(String dip, int dport)
+    {
+        InetSocketAddress address = new InetSocketAddress(dip, dport);
+        addresses.add(address);
+    }
+    public void addipAddress(String dip)
+    {
+        destinationIPs.add(dip);
+    }
+    public void addport(int dport)
+    {
+        //InetSocketAddress address = new InetSocketAddress(dip, dport);
+        destinationPorts.add(dport);
+    }
+    public ArrayList<InetSocketAddress> totaladdresses()
+    {
+        return addresses;
+    }
+    public int getSize()
+    {
+        return addresses.size();
+    }
+
 
    public void start(int level)
    {
@@ -70,34 +99,27 @@ public class SwingControlDemo {
 		//String name = scanner.nextLine();
 		
 		//System.out.print("Source Port : ");
-		int sourcePort=1234;
+		
 		//int sourcePort = Integer.parseInt(scanner.nextLine());
 		String p=port.getText();
-        String i=ip.getText();
+		int sourcePort = Integer.parseInt(p);
+        String destinationIP=ip.getText();
+       
+        
         String pr=port_rivals.getText();
+        int destinationPort = Integer.parseInt(pr);
         String loc = String.valueOf(cb.getSelectedItem());
-        String n=String.valueOf(no_of_players.getSelectedItem());
+        String numberr=String.valueOf(no_of_players.getSelectedItem());
+         ai_level=Integer.parseInt(numberr);
+        destinationPorts.add(destinationPort);
+        destinationIPs.add(destinationIP);
 		
-		System.out.print("Destination IP : ");
-		//String destinationIP = "192.168.146.51";
-		String destinationIP2 = "10.234.11.217";
-		String destinationIP = "10.192.51.85";
-		//String destinationIP = scanner.nextLine();
 		
-		System.out.print("Destination Port : ");
-		int destinationPort2=2345;
-		int destinationPort=3456;
-		//int destinationPort = Integer.parseInt(scanner.nextLine());
-		//////////////////////////////////////here we will ask which side the player is playing. Based on that, different channel will be called.
-		/*Channel channel = new Channel();
-		channel.bind(sourcePort);
-		channel.start(); // Start Receive
-		*/
 		System.out.println("Started.");
 		String playmsg = "play";
 		InetSocketAddress address = new InetSocketAddress(destinationIP, destinationPort);
+		 addresses.add(address);
 		/////////////////////////////////////////////////////////////////////////////////////////
-		InetSocketAddress address2 = new InetSocketAddress(destinationIP2, destinationPort2);
 		
         JFrame frame = new JFrame("Pong");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -110,7 +132,7 @@ public class SwingControlDemo {
         if(loc=="down"){location="dh";}
         if(loc=="left"){location="lv";}
 
-        twoplayer1 two = new twoplayer1(location);
+         twoplayer1 two = new twoplayer1(location, sourcePort);
         two.setPreferredSize(new Dimension(500, 500));
         try{
         two.bind(sourcePort);
@@ -118,23 +140,42 @@ public class SwingControlDemo {
     	System.out.println("exception");
     }
         two.start();
-        two.getaddress(address, address2);
-        //two.getaddress(address2);
+        two.addAddress(destinationIP,destinationPort);
+        String sourceIP="";
+        try{
+         sourceIP=Inet4Address.getLocalHost().getHostAddress();}
+        catch(UnknownHostException e){System.out.println("exception");}
+       // System.out.println(sourceIP);
+        String ipmsg="add1_"+sourceIP+"_"+sourcePort;
+            
+                int n= addresses.size();
+            	InetSocketAddress tempaddress;
+                for(int i=0;i<n;i++){
+                	
+                     tempaddress=addresses.get(i);
+                     try    {
+                    two.sendTo(tempaddress,ipmsg);
+                    }
+                     catch(IOException e){System.out.println("exception");}
+                    System.out.println("Message sent to : "+ i );
+                }
         
         
         //two.location=location;
         if(playmsg.equals("play"))
         {
+        	System.out.println(two.addresses.size());
+        	
         	two.startgamelocal=true;
         	System.out.println(two.startgamelocal);
-        	try{
-        	two.sendTo(address, playmsg);
-        	two.sendTo(address2,playmsg);}
-        	catch(IOException e){
-        		System.out.println("except");
-        	}
-        	two.getdestinationports(destinationPort,destinationPort2);
-        	System.out.println("Local machine play");	
+        	for (int i=0;i<two.addresses.size();i++){
+        		try{
+                two.sendTo(two.addresses.get(i),playmsg);}
+        	 catch(IOException e){System.out.println("exception");}
+                System.out.println("play msg sent");
+                System.out.println(two.addresses.get(i));
+            }
+            System.out.println("Local machine play");   
         }
         //frame.setResizable(false);
         
@@ -173,7 +214,7 @@ public class SwingControlDemo {
       label.setBackground(Color.GRAY);
       label.setForeground(Color.WHITE);
       controlPanel.add(label);
-      label.setVisible(false);
+      label.setVisible(true);
       controlPanel.add(statusLabel);
       controlPanel.add(easy);
        controlPanel.add(medium);
@@ -188,8 +229,10 @@ public class SwingControlDemo {
     controlPanel.add(port);
     controlPanel.add(port_rivals);
      controlPanel.add(cb);
+     controlPanel.add(no_of_players);
     controlPanel.add(proceed);
     controlPanel.add(back);
+    
 
     ip.setVisible(false);
     port.setVisible(false);
@@ -197,6 +240,7 @@ public class SwingControlDemo {
     cb.setVisible(false);
     proceed.setVisible(false);
     back.setVisible(false);
+    no_of_players.setVisible(false);
 
       swingControlDemo.showEventDemo();       
    }
@@ -213,6 +257,8 @@ public class SwingControlDemo {
    	controlPanel.add(play_again);
    	controlPanel.add(headerLabel);
    	controlPanel.add(score);
+
+   	
    	frame.dispose();
 
    	frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
@@ -260,7 +306,7 @@ public class SwingControlDemo {
    }
 
    private void multiplayer(){
-    label.setVisible(false);
+    
     
    	headerLabel.setText("Ready for the clash...?");
    	
@@ -280,6 +326,7 @@ public class SwingControlDemo {
     cb.setVisible(true);
     proceed.setVisible(true);
     back.setVisible(true);
+    no_of_players.setVisible(true);
    
    	mainFrame.setVisible(true);
    }
@@ -287,8 +334,7 @@ public class SwingControlDemo {
 
 
    	headerLabel.setText("Computers are getting smarter, Be aware of that:");
-    label.setVisible(false);
-   	
+    
    	back2.setActionCommand("BACK");
     back2.addActionListener(new ButtonClickListener()); 	
     
@@ -298,13 +344,13 @@ public class SwingControlDemo {
     medium.setVisible(true);
     difficult.setVisible(true);
     back2.setVisible(true);
-   	
-   	easy.setActionCommand("easy");
+    easy.setActionCommand("easy");
    	easy.addActionListener(new ButtonClickListener()); 
    	medium.setActionCommand("medium");
    	medium.addActionListener(new ButtonClickListener()); 
    	difficult.setActionCommand("difficult");
    	difficult.addActionListener(new ButtonClickListener()); 
+   
    	mainFrame.setVisible(true);
    }
 
@@ -324,33 +370,49 @@ public class SwingControlDemo {
          else if(command.equals( "easy" )){
          	statusLabel.setText("easy");
          	System.out.println("Easy");
-
-         	start(1);//Function to start the game
+         	if(problem==0)
+         	{
+         		start(1);//Function to start the game
+         		problem=1;
+         	}
          }
          else if(command.equals( "medium" )){
          	statusLabel.setText("medium");
          	System.out.println("Medium");
-         	start(2);//Function to start the game
+         	if(problem==0)
+         	{
+         		start(2);//Function to start the game
+         		problem=1;
+         	}
          }
          else if(command.equals( "difficult" )){
          	statusLabel.setText("difficult");
          	System.out.println("difficult");
-         	start(3);//Function to start the game
+         	if(problem==0)
+         	{
+         		start(3);//Function to start the game
+         		problem=1;
+         	}
          }
          else if(command.equals( "proceed" )){
          	statusLabel.setText("Starting the Game");
          	System.out.println("Started");
-         	start_multi(2);//Function to start the game
+         	if(problem==0)
+         	{
+         		start_multi(ai_level);//Function to start the game
          }
+         		problem=1;
+         	}
+         	
          else if(command.equals( "back" )){
          	statusLabel.setText("back");
          	System.out.println("Back");
-         	controlPanel.remove(ip);
-
+         	
       		ip.setVisible(false);
         port.setVisible(false);
         port_rivals.setVisible(false);
         cb.setVisible(false);
+        no_of_players.setVisible(false);
        proceed.setVisible(false);
         back.setVisible(false);
         single.setVisible(true);
@@ -376,7 +438,9 @@ public class SwingControlDemo {
          }
          else if(command.equals("again")){
          	play_again.setVisible(false);
-         	swingControlDemo.showEventDemo();           
+         	//swingControlDemo.showEventDemo(); 
+         	String[] args = new String[0]; // Or String[] args = {};
+		main(args);          
          }
          else  {
             statusLabel.setText("Cancel Button clicked.");
