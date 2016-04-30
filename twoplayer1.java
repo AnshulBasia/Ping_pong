@@ -21,6 +21,10 @@ import java.util.*;
 public class twoplayer1 extends JPanel implements ActionListener, KeyListener, Runnable{
 
 	public boolean qpressed=false;
+	boolean connectionlv=true;
+	boolean connectiondh=true;
+	boolean connectionuh=true;
+	boolean connectionrv=true;
     public int looptimer=0;
     public int waittimer=-1;
     private DatagramSocket socket;
@@ -327,7 +331,7 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                     String coordinates[]=msg.split("_");
                     if(coordinates[0].equals("lv"))
                     {
-                        islv=true;
+                        if(connectionlv){islv=true;}
                         String tempxcoordinates=coordinates[1];
                         String tempycoordinates=coordinates[2];
                         lvX=Integer.parseInt(tempxcoordinates);
@@ -336,7 +340,7 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                     }
                     else if(coordinates[0].equals("dh"))
                     {
-                        isdh=true;
+                        if(connectiondh){isdh=true;}
                         String tempxcoordinates=coordinates[1];
                         String tempycoordinates=coordinates[2];
                         dhX=Integer.parseInt(tempxcoordinates);
@@ -344,7 +348,7 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                     }   
                     else if(coordinates[0].equals("rv"))
                     {
-                        isrv=true;
+                       if(connectionrv) {isrv=true;}
                         String tempxcoordinates=coordinates[1];
                         String tempycoordinates=coordinates[2];
                         rvX=Integer.parseInt(tempxcoordinates);
@@ -352,7 +356,7 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                     }
                     else if(coordinates[0].equals("uh"))
                     {
-                        isuh=true;
+                        if(connectionuh){isuh=true;}
                         String tempxcoordinates=coordinates[1];
                         String tempycoordinates=coordinates[2];
                         uhX=Integer.parseInt(tempxcoordinates);
@@ -385,6 +389,7 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                         ballY=Integer.parseInt(bally);
                         
                         System.out.println("ball collision msg recieved");
+                        
                 
                     }
                     if(coordinates[0].equals("dh"))
@@ -403,6 +408,7 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                         ballX=Integer.parseInt(ballx);
                         ballY=Integer.parseInt(bally);
                         
+                        
                         System.out.println("ball collision msg recieved");
                     } 
                     if(coordinates[0].equals("rv"))
@@ -420,6 +426,7 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                         ballX=Integer.parseInt(ballx);
                         ballY=Integer.parseInt(bally);
                         System.out.println("ball collision msg recieved");
+                        
                 
                     }
                     if(coordinates[0].equals("uh"))
@@ -440,14 +447,31 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                         ballX=Integer.parseInt(ballx);
                         ballY=Integer.parseInt(bally);
                         System.out.println("ball collision msg recieved");
+                      
                     }
                 }
-                if(msg.equals("0"))
+                if(msg.charAt(msg.length()-1)=='z')
                 {
                     ballDeltaX=0;
                     ballDeltaY=0;
                     ballX=240;
                     ballY=240;
+                    if(msg.charAt(0)=='l')
+                    {
+                        playerlvLives--;
+                    }
+                    if(msg.charAt(0)=='d')
+                    {
+                        playerdhLives--;
+                    }
+                    if(msg.charAt(0)=='r')
+                    {
+                        playerrvLives--;
+                    }
+                    if(msg.charAt(0)=='u')
+                    {
+                        playeruhLives--;
+                    }
 		    reset_AI();
                 }
                 else if(msg.equals("1"))
@@ -459,21 +483,25 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                 if(msg.equals("lv_quit"))
                 {
                     islv=false;
+                    connectionlv=false;
                     //AI(2,"left");
                 }
                 if(msg.equals("dh_quit"))
                 {
                     isdh=false;
+                     connectiondh=false;
                     //AI(2,"down");
                 }
                 if(msg.equals("rv_quit"))
                 {
                     isrv=false;
+                     connectionrv=false;
                     //AI(2,"right");
                 }
                 if(msg.equals("uh_quit"))
                 {
                     isuh=false;
+                     connectionuh=false;
                     //AI(2,"up");
                 }
 
@@ -559,8 +587,8 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                 catch(IOException e){
                     System.out.println("exception");
                 }
-            //SwingControlDemo exit = new SwingControlDemo();  
-    	 	//exit.exit(playerdhLives);
+            SwingControlDemo exit = new SwingControlDemo();  
+    	 	exit.exit(playerdhLives);
             }
 
             if(location.equals("rv")){
@@ -574,8 +602,8 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                 catch(IOException e){
                     System.out.println("exception");
                 }
-            //SwingControlDemo exit = new SwingControlDemo();  
-    		 //exit.exit(playerrvLives);
+            SwingControlDemo exit = new SwingControlDemo();  
+    		 exit.exit(playerrvLives);
             }
 
             if(location.equals("uh")){
@@ -589,8 +617,8 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                     System.out.println("exception");
                 }
 
-            //SwingControlDemo exit = new SwingControlDemo();  
-    	 	//exit.exit(playeruhLives);
+            SwingControlDemo exit = new SwingControlDemo();  
+    	 	exit.exit(playeruhLives);
             }
 
             qpressed=false;
@@ -623,6 +651,7 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
         }
         if(!location.equals("lv")&& !islv)
         {
+            
             AI(2,"left",nextBallLeft, nextBallRight, nextBallTop, nextBallBottom);
         }
         if(!location.equals("dh")&& !isdh)
@@ -714,7 +743,7 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                     int n= addresses.size();  
                     for(int i=0;i<n;i++){
                         InetSocketAddress tempaddress=addresses.get(i);
-                        sendTo(tempaddress,"0");
+                        sendTo(tempaddress,"lv_z");
                     }
                 }
                 catch(IOException e)
@@ -736,12 +765,13 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
             else {
                 System.out.println("collision detected");
                 ballDeltaX *= -1;
-                if((ballY>localplayerY&&ballY-localplayerY<=5)||ballY<localplayerY+localplayerHeight&&ballY>=localplayerY+localplayerHeight-5)
+               /* if((ballY>localplayerY&&ballY-localplayerY<=5)||ballY<localplayerY+localplayerHeight&&ballY>=localplayerY+localplayerHeight-5)
                 {
                     lvedge=true;
                 }
 
-                if(lvedge)
+                
+              if(lvedge)
                 {
                     temp_y1=ballDeltaY;
                     ballDeltaY*=2;
@@ -752,6 +782,7 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                     if(ballDeltaY>0){ballDeltaY=Math.abs(temp_y1);}
                     else{ballDeltaY=-1*Math.abs(temp_y1);}
                 }
+                */
 
                 String positionballmsg="";
                 positionballmsg=positionballmsg+"lv"+"_"+localplayerX+"_"+localplayerY+"_"+ballDeltaX+"_"+ballDeltaY+"_"+ballX+"_"+ballY;
@@ -793,7 +824,7 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                     int n= addresses.size();  
                     for(int i=0;i<n;i++){
                         InetSocketAddress tempaddress=addresses.get(i);
-                        sendTo(tempaddress,"0");
+                        sendTo(tempaddress,"dh_z");
                     }
                 }
                 catch(IOException e)
@@ -815,6 +846,8 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                 System.out.println("collision detected");
                 ballDeltaY *= -1;
 
+                /*
+
                 if((ballX>localplayerX&&ballX-localplayerX<=5)||ballX<localplayerX+localplayerWidth&&ballX>=localplayerX+localplayerWidth-5)
                 {
                     dhedge=true;
@@ -831,6 +864,7 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                     if(ballDeltaX>0){ballDeltaX=Math.abs(temp_x);}
                     else{ballDeltaX=-1*Math.abs(temp_x);}
                 }
+                */
                 String positionballmsg="";
                 positionballmsg=positionballmsg+"dh"+"_"+localplayerX+"_"+localplayerY+"_"+ballDeltaX+"_"+ballDeltaY+"_"+ballX+"_"+ballY;
                 try
@@ -869,7 +903,7 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                     int n= addresses.size();  
                     for(int i=0;i<n;i++){
                         InetSocketAddress tempaddress=addresses.get(i);
-                        sendTo(tempaddress,"0");
+                        sendTo(tempaddress,"rv_z");
                     }
                 }
                 catch(IOException e)
@@ -890,6 +924,7 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
             else {
                 System.out.println("collision detected");
                 ballDeltaX *= -1;
+                /*
 
                 if((ballY>localplayerY&&ballY-localplayerY<=5)||ballY<localplayerY+localplayerHeight&&ballY>=localplayerY+localplayerHeight-5)
                 {
@@ -907,6 +942,7 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                     if(ballDeltaY>0){ballDeltaY=Math.abs(temp_y);}
                     else{ballDeltaY=-1*Math.abs(temp_y);}
                 }
+                */
 
                 String positionballmsg="";
                 positionballmsg=positionballmsg+"rv"+"_"+localplayerX+"_"+localplayerY+"_"+ballDeltaX+"_"+ballDeltaY+"_"+ballX+"_"+ballY;
@@ -945,7 +981,7 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                     int n= addresses.size();  
                     for(int i=0;i<n;i++){
                         InetSocketAddress tempaddress=addresses.get(i);
-                        sendTo(tempaddress,"0");
+                        sendTo(tempaddress,"uh_z");
                     }
                 }
                 catch(IOException e)
@@ -965,6 +1001,7 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
             else {
                 System.out.println("collision detected");
                 ballDeltaY *= -1;
+                /*
 
                 if((ballX>localplayerX&&ballX-localplayerX<=5)||ballX<localplayerX+localplayerWidth&&ballX>=localplayerX+localplayerWidth-5)
                 {
@@ -982,7 +1019,7 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                     if(ballDeltaX>0){ballDeltaX=Math.abs(temp_x1);}
                     else{ballDeltaX=-1*Math.abs(temp_x1);}
                 }
-                
+                */
                 String positionballmsg="";
                 positionballmsg=positionballmsg+"uh"+"_"+localplayerX+"_"+localplayerY+"_"+ballDeltaX+"_"+ballDeltaY+"_"+ballX+"_"+ballY;
                 try
@@ -1125,6 +1162,7 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
             else {
                 //System.out.println("collision detected");
                 ballDeltaY *= -1;
+                /*
 
                 if((ballX>playerOneX&&ballX-playerOneX<=5)||ballX<playerOneX+playerOneWidth&&ballX>=playerOneX+playerOneWidth-5)
                 {
@@ -1142,6 +1180,7 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                     if(ballDeltaX>0){ballDeltaX=Math.abs(temp_x);}
                     else{ballDeltaX=-1*Math.abs(temp_x);}
                 }
+                */
             }
         }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1185,6 +1224,7 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
             else {
                 System.out.println("collision detected");
                 ballDeltaX *= -1;
+                /*
 
                 if((ballY>playerTwoY&&ballY-playerTwoY<=5)||ballY<playerTwoY+playerTwoHeight&&ballY>=playerTwoY+playerTwoHeight-5)
                 {
@@ -1202,7 +1242,7 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                     if(ballDeltaY>0){ballDeltaY=Math.abs(temp_y);}
                     else{ballDeltaY=-1*Math.abs(temp_y);}
                 }
-
+				*/
             }
         }  
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1248,6 +1288,7 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
             else {
                 System.out.println("collision detected");
                 ballDeltaY *= -1;
+                /*
 
                 if((ballX>playerThreeX&&ballX-playerThreeX<=5)||ballX<playerThreeX+playerThreeWidth&&ballX>=playerThreeX+playerThreeWidth-5)
                 {
@@ -1265,6 +1306,7 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                     if(ballDeltaX>0){ballDeltaX=Math.abs(temp_x1);}
                     else{ballDeltaX=-1*Math.abs(temp_x1);}
                 }
+                */
                 
             }
         }
@@ -1273,6 +1315,7 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
             }
 
             if(position.equals("left")){
+            	
 
                 if(ballDeltaY<=8&& ballDeltaY>=-8){comp_paddle4=ballDeltaY;}
                 else {
@@ -1312,6 +1355,7 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
             else {
                 System.out.println("collision detected");
                 ballDeltaX *= -1;
+                /*
                 if((ballY>playerFourY&&ballY-playerFourY<=5)||ballY<playerFourY+playerFourHeight&&ballY>=playerFourY+playerFourHeight-5)
                 {
                     lvedge=true;
@@ -1328,6 +1372,7 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
                     if(ballDeltaY>0){ballDeltaY=Math.abs(temp_y1);}
                     else{ballDeltaY=-1*Math.abs(temp_y1);}
                 }
+                */
             }
         
         }
@@ -1390,6 +1435,7 @@ public class twoplayer1 extends JPanel implements ActionListener, KeyListener, R
 
         if(!location.equals("lv")&& !islv)
         {
+        		
             g.drawLine(playerFourX+playerFourWidth, 0,playerFourX+playerFourWidth, getHeight());
             g.fillRoundRect(playerFourX, playerFourY, playerFourWidth, playerFourHeight, horizontalround, verticalround);
         }

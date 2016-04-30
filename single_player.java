@@ -18,7 +18,7 @@ import java.util.*;
 public class single_player extends JPanel implements ActionListener, KeyListener{
 	Random randomno=new Random();
 
-	
+		
    
     private boolean leftPressed = false;
     private boolean rightPressed = false;
@@ -123,7 +123,7 @@ public class single_player extends JPanel implements ActionListener, KeyListener
     	 
 
     	 SwingControlDemo exit = new SwingControlDemo();  
-    	 exit.exit(playerOneScore,playerOneLives);
+    	 exit.exit(playerOneLives);
 
     }
 
@@ -210,7 +210,8 @@ public class single_player extends JPanel implements ActionListener, KeyListener
 
 
     	if(qpressed||playerOneLives<=0){
-    		exit();
+    		SwingControlDemo exit = new SwingControlDemo();  
+    	 	exit.exit(playerOneLives);
     	}
         
 
