@@ -1,6 +1,0 @@
-We haven't implemented special powers in networked multiplayer game because it will require another message to be sent across which will lead to additional burden on the existing coordinates that are bein sent.
-However these special powers have been implemented when the player choses to play singleplayer mode.
-
-Instead of simple elastic collsion, we have improved the physics of the game to make it more interesting for the user. In case of simple elastic collision, the ball would have had moved in a specific path.
-
-The computer algorithm is running on each machine individually and is not hosted on any single 'central server'.
